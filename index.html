@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Special Angle Trig Quiz (0°–360°)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 60px;
+      font-size: 20px;
+    }
+    input[type="text"] {
+      padding: 12px;
+      font-size: 20px;
+      margin-top: 15px;
+      width: 300px;
+    }
+    input[type="checkbox"], select {
+      transform: scale(1.3);
+      margin: 10px;
+    }
+    button {
+      margin: 12px;
+      padding: 12px 24px;
+      font-size: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .feedback {
+      margin-top: 25px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .timer {
+      font-size: 20px;
+      margin-top: 15px;
+      color: #555;
+    }
+    .note {
+      font-size: 16px;
+      margin-top: 25px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trig Quiz: Special Angles</h1>
+  <label><input type="checkbox" id="includeInverse"> Include inverse trig functions (csc, sec, cot)</label>
+  <div id="quizBox"></div>
+  <input type="text" id="userAnswer" placeholder="Enter answer (e.g., sqrt(3)/2)">
+  <br>
+  <button onclick="checkAnswer()">Check Answer</button>
+  <button onclick="newQuiz()">Next Question</button>
+  <div class="timer" id="timerBox">Time left: 10s</div>
+  <div class="feedback" id="feedback"></div>
+  <div class="note">* Use 'sqrt' to write square roots. Example: √3 → sqrt(3)</div>
+
+  <script>
+    const trigValues = {
+      "sin 0": "0", "sin 30": "1/2", "sin 45": "sqrt(2)/2", "sin 60": "sqrt(3)/2", "sin 90": "1",
+      "sin 120": "sqrt(3)/2", "sin 135": "sqrt(2)/2", "sin 150": "1/2", "sin 180": "0",
+      "sin 210": "-1/2", "sin 225": "-sqrt(2)/2", "sin 240": "-sqrt(3)/2", "sin 270": "-1",
+      "sin 300": "-sqrt(3)/2", "sin 315": "-sqrt(2)/2", "sin 330": "-1/2", "sin 360": "0",
+      "cos 0": "1", "cos 30": "sqrt(3)/2", "cos 45": "sqrt(2)/2", "cos 60": "1/2", "cos 90": "0",
+      "cos 120": "-1/2", "cos 135": "-sqrt(2)/2", "cos 150": "-sqrt(3)/2", "cos 180": "-1",
+      "cos 210": "-sqrt(3)/2", "cos 225": "-sqrt(2)/2", "cos 240": "-1/2", "cos 270": "0",
+      "cos 300": "1/2", "cos 315": "sqrt(2)/2", "cos 330": "sqrt(3)/2", "cos 360": "1",
+      "tan 0": "0", "tan 30": "1/sqrt(3)", "tan 45": "1", "tan 60": "sqrt(3)", "tan 90": "undefined",
+      "tan 120": "-sqrt(3)", "tan 135": "-1", "tan 150": "-1/sqrt(3)", "tan 180": "0",
+      "tan 210": "1/sqrt(3)", "tan 225": "1", "tan 240": "sqrt(3)", "tan 270": "undefined",
+      "tan 300": "-sqrt(3)", "tan 315": "-1", "tan 330": "-1/sqrt(3)", "tan 360": "0",
+      "csc 30": "2", "csc 45": "sqrt(2)", "csc 60": "2/sqrt(3)", "csc 90": "1",
+      "csc 120": "2/sqrt(3)", "csc 135": "sqrt(2)", "csc 150": "2", "csc 210": "-2",
+      "csc 225": "-sqrt(2)", "csc 240": "-2/sqrt(3)", "csc 270": "-1", "csc 300": "-2/sqrt(3)",
+      "csc 315": "-sqrt(2)", "csc 330": "-2",
+      "sec 0": "1", "sec 30": "2/sqrt(3)", "sec 45": "sqrt(2)", "sec 60": "2",
+      "sec 120": "-2", "sec 135": "-sqrt(2)", "sec 150": "-2/sqrt(3)", "sec 180": "-1",
+      "sec 210": "-2/sqrt(3)", "sec 225": "-sqrt(2)", "sec 240": "-2", "sec 300": "2",
+      "sec 315": "sqrt(2)", "sec 330": "2/sqrt(3)", "sec 360": "1",
+      "cot 30": "sqrt(3)", "cot 45": "1", "cot 60": "1/sqrt(3)",
+      "cot 120": "-1/sqrt(3)", "cot 135": "-1", "cot 150": "-sqrt(3)",
+      "cot 210": "sqrt(3)", "cot 225": "1", "cot 240": "1/sqrt(3)",
+      "cot 300": "-1/sqrt(3)", "cot 315": "-1", "cot 330": "-sqrt(3)"
+    };
+
+    const allFuncs = ["sin", "cos", "tan", "csc", "sec", "cot"];
+    const baseFuncs = ["sin", "cos", "tan"];
+    const angles = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330, 360];
+    let currentKey = "";
+    let timer;
+    let timeLeft = 10;
+
+    function getFuncPool() {
+      const includeInverse = document.getElementById("includeInverse").checked;
+      return includeInverse ? allFuncs : baseFuncs;
+    }
+
+    function newQuiz() {
+      const funcs = getFuncPool();
+      let key = "";
+      while (!(key in trigValues)) {
+        const randFunc = funcs[Math.floor(Math.random() * funcs.length)];
+        const randAngle = angles[Math.floor(Math.random() * angles.length)];
+        key = `${randFunc} ${randAngle}`;
+      }
+      currentKey = key;
+      document.getElementById("quizBox").innerText = `${currentKey}° = ?`;
+      const inputBox = document.getElementById("userAnswer");
+      inputBox.value = "";
+      inputBox.focus();
+      document.getElementById("feedback").innerText = "";
+      resetTimer();
+    }
+
+    function checkAnswer() {
+      clearInterval(timer);
+      const userInput = document.getElementById("userAnswer").value.trim();
+      const correctAnswer = trigValues[currentKey];
+      if (userInput === correctAnswer) {
+        document.getElementById("feedback").innerText = "Correct! ✅";
+        document.getElementById("feedback").style.color = "green";
+      } else {
+        document.getElementById("feedback").innerText = `Wrong ❌ Correct answer: ${correctAnswer}`;
+        document.getElementById("feedback").style.color = "red";
+      }
+    }
+
+    function resetTimer() {
+      timeLeft = 15;
+      document.getElementById("timerBox").innerText = `Time left: ${timeLeft}s`;
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timerBox").innerText = `Time left: ${timeLeft}s`;
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          checkAnswer();
+        }
+      }, 1000);
+    }
+
+    document.getElementById("userAnswer").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        checkAnswer();
+      }
+    });
+
+    newQuiz();
+  </script>
+</body>
+</html>
