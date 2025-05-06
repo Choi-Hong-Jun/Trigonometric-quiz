@@ -56,6 +56,7 @@
   <div class="feedback" id="feedback"></div>
   <div class="note">* Use 'sqrt' to write square roots. Example: √3 → sqrt(3)</div>
 
+  <!-- 🔽 JS는 HTML 요소가 모두 로드된 뒤 실행되도록 body 맨 아래 배치 -->
   <script>
     const TIME_LIMIT = 10;
     const trigValues = {
@@ -128,6 +129,7 @@
       }
     });
 
+    // ✅ 최초 문제 로드
     newQuiz();
   </script>
 </body>
