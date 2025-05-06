@@ -16,10 +16,6 @@
       margin-top: 15px;
       width: 300px;
     }
-    input[type="checkbox"], select {
-      transform: scale(1.3);
-      margin: 10px;
-    }
     button {
       margin: 12px;
       padding: 12px 24px;
@@ -46,8 +42,7 @@
 </head>
 <body>
   <h1>Trig Quiz: Special Angles</h1>
-  <label><input type="checkbox" id="includeInverse" disabled> Include inverse trig functions (csc, sec, cot) — Disabled</label>
-  <div id="quizBox"></div>
+  <div id="quizBox">Loading...</div>
   <input type="text" id="userAnswer" placeholder="Enter answer (e.g., sqrt(3)/2)">
   <br>
   <button onclick="checkAnswer()">Check Answer</button>
@@ -56,7 +51,6 @@
   <div class="feedback" id="feedback"></div>
   <div class="note">* Use 'sqrt' to write square roots. Example: √3 → sqrt(3)</div>
 
-  <!-- 🔽 JS는 HTML 요소가 모두 로드된 뒤 실행되도록 body 맨 아래 배치 -->
   <script>
     const TIME_LIMIT = 10;
     const trigValues = {
@@ -72,18 +66,9 @@
     let timer;
     let timeLeft = TIME_LIMIT;
 
-    function getFuncPool() {
-      return ["sin", "cos", "tan"];
-    }
-
     function newQuiz() {
-      const funcs = getFuncPool();
-      const pool = Object.keys(trigValues).filter(key => {
-        const func = key.split(" ")[0];
-        return funcs.includes(func);
-      });
-
-      currentKey = pool[Math.floor(Math.random() * pool.length)];
+      const keys = Object.keys(trigValues);
+      currentKey = keys[Math.floor(Math.random() * keys.length)];
       document.getElementById("quizBox").innerText = `${currentKey}° = ?`;
       document.getElementById("userAnswer").value = "";
       document.getElementById("userAnswer").focus();
@@ -129,8 +114,8 @@
       }
     });
 
-    // ✅ 최초 문제 로드
-    newQuiz();
+    // 문제 처음 실행
+    window.onload = newQuiz;
   </script>
 </body>
 </html>
