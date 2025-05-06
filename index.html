@@ -46,7 +46,7 @@
 </head>
 <body>
   <h1>Trig Quiz: Special Angles</h1>
-  <label><input type="checkbox" id="includeInverse"> Include inverse trig functions (csc, sec, cot)</label>
+  <label><input type="checkbox" id="includeInverse" disabled> Include inverse trig functions (csc, sec, cot) — Disabled</label>
   <div id="quizBox"></div>
   <input type="text" id="userAnswer" placeholder="Enter answer (e.g., sqrt(3)/2)">
   <br>
@@ -57,6 +57,7 @@
   <div class="note">* Use 'sqrt' to write square roots. Example: √3 → sqrt(3)</div>
 
   <script>
+    const TIME_LIMIT = 10;
     const trigValues = {
       "sin 0": "0", "sin 30": "1/2", "sin 45": "sqrt(2)/2", "sin 60": "sqrt(3)/2", "sin 90": "1",
       "sin 180": "0", "sin 270": "-1", "sin 360": "0",
@@ -66,50 +67,49 @@
       "tan 180": "0", "tan 270": "undefined", "tan 360": "0"
     };
 
-    const allFuncs = ["sin", "cos", "tan"];
-    const baseFuncs = ["sin", "cos", "tan"];
-    const angles = [0, 30, 45, 60, 90, 180, 270, 360];
     let currentKey = "";
     let timer;
-    let timeLeft = 10;
+    let timeLeft = TIME_LIMIT;
 
     function getFuncPool() {
-      const includeInverse = document.getElementById("includeInverse").checked;
-      return includeInverse ? allFuncs : baseFuncs;
+      return ["sin", "cos", "tan"];
     }
 
     function newQuiz() {
       const funcs = getFuncPool();
-      let key = "";
-      while (!(key in trigValues)) {
-        const randFunc = funcs[Math.floor(Math.random() * funcs.length)];
-        const randAngle = angles[Math.floor(Math.random() * angles.length)];
-        key = `${randFunc} ${randAngle}`;
-      }
-      currentKey = key;
+      const pool = Object.keys(trigValues).filter(key => {
+        const func = key.split(" ")[0];
+        return funcs.includes(func);
+      });
+
+      currentKey = pool[Math.floor(Math.random() * pool.length)];
       document.getElementById("quizBox").innerText = `${currentKey}° = ?`;
-      const inputBox = document.getElementById("userAnswer");
-      inputBox.value = "";
-      inputBox.focus();
+      document.getElementById("userAnswer").value = "";
+      document.getElementById("userAnswer").focus();
       document.getElementById("feedback").innerText = "";
       resetTimer();
     }
 
+    function normalize(str) {
+      return str.toLowerCase().replace(/\s+/g, "");
+    }
+
     function checkAnswer() {
       clearInterval(timer);
-      const userInput = document.getElementById("userAnswer").value.trim();
-      const correctAnswer = trigValues[currentKey];
+      const userInput = normalize(document.getElementById("userAnswer").value);
+      const correctAnswer = normalize(trigValues[currentKey]);
+
       if (userInput === correctAnswer) {
         document.getElementById("feedback").innerText = "Correct! ✅";
         document.getElementById("feedback").style.color = "green";
       } else {
-        document.getElementById("feedback").innerText = `Wrong ❌ Correct answer: ${correctAnswer}`;
+        document.getElementById("feedback").innerText = `Wrong ❌ Correct answer: ${trigValues[currentKey]}`;
         document.getElementById("feedback").style.color = "red";
       }
     }
 
     function resetTimer() {
-      timeLeft = 15;
+      timeLeft = TIME_LIMIT;
       document.getElementById("timerBox").innerText = `Time left: ${timeLeft}s`;
       clearInterval(timer);
       timer = setInterval(() => {
